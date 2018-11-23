@@ -20,9 +20,17 @@ func NewMessageError(identifier,format string,a ...interface{}) Error{
 	if identifier == "-"{
 		return NoError
 	}else{
-		return Error{
-			identifier:identifier,
-			errorMsg:fmt.Sprintf(format,a...),
+		_, exist := errList[identifier]
+		if exist{
+			return Error{
+				identifier:identifier,
+				errorMsg:fmt.Sprintf(format,a...),
+			}
+		}else{
+			return Error{
+				identifier:"Internal",
+				errorMsg:fmt.Sprintf(format,a...),
+			}
 		}
 	}
 }
