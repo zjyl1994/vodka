@@ -83,17 +83,13 @@ func Handle(method ,url string,validRules Rules,allowEmptyBody bool,handler Hand
 		ret,err := handler(c,param)
 		if hasError(err){
 			statusCode,ok := errList[err.identifier]
-			if ok{
-				c.JSON(statusCode,gin.H{
-					"result":nil,
-					"error":err.errorMsg,
-				})
-			}else{
-				c.JSON(http.StatusInternalServerError,gin.H{
-					"result":nil,
-					"error":err.errorMsg,
-				})
+			if !ok{
+				statusCode = http.StatusInternalServerError
 			}
+			c.JSON(statusCode,gin.H{
+				"result":ret,
+				"error":err.errorMsg,
+			})
 		}else{
 			c.JSON(http.StatusOK,gin.H{
 				"result":ret,
