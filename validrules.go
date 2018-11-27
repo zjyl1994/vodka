@@ -6,6 +6,7 @@ import (
 	"reflect"
 	"strconv"
 	"strings"
+	"regexp"
 
 	"github.com/thedevsaddam/govalidator"
 )
@@ -120,5 +121,18 @@ func init() {
 			return fmt.Errorf("The %s field must be a array", field)
 		}
 		return nil
+	})
+
+	govalidator.AddCustomRule("datetime", func(field string, rule string, message string, value interface{}) error {
+		const datetimeRegex=`^\d\d\d\d-([0][1-9]|1[0-2])-([0][1-9]|[12][0-9]|3[01]) (00|[0][0-9]|1[0-9]|2[0-3]):([0-9]|[0-5][0-9]):([0-9]|[0-5][0-9])$`
+		if datetimeStr,ok := value.(string);ok{
+			if match, _ := regexp.MatchString(datetimeRegex, datetimeStr); match{
+				return nil
+			}
+		}
+		if message != "" {
+			return errors.New(message)
+		}
+		return fmt.Errorf("The %s field must be yyyy-MM-dd HH:mm:ss format", field)
 	})
 }
