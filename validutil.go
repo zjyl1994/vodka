@@ -19,6 +19,13 @@ func validateQueryStringParamsForRequest(req *http.Request, rules map[string][]s
 		params[k] = v[0]
 	}
 	amUtil.FilterOutRangeFields(params, amUtil.KeysA(rules))
+	for rName,rValue := range rules{
+		if !amUtil.IsArrayInclude(rValue,"allow_empty"){
+			if len(params[rName].(string))==0{
+				delete(params,rName)
+			}
+		}
+	}
 	return errsBag,params
 }
 

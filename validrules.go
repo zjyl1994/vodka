@@ -106,4 +106,19 @@ func init() {
 
 		return nil
 	})
+
+	govalidator.AddCustomRule("allow_empty", func(field string, rule string, message string, value interface{}) error {
+		return nil
+	})
+
+	govalidator.AddCustomRule("array", func(field string, rule string, message string, value interface{}) error {
+		amUtil := new(ArrayMapUtil)
+		if amUtil.KindOfData(value) != reflect.Array{
+			if message != "" {
+				return errors.New(message)
+			}
+			return fmt.Errorf("The %s field must be a array", field)
+		}
+		return nil
+	})
 }
