@@ -114,7 +114,8 @@ func init() {
 
 	govalidator.AddCustomRule("array", func(field string, rule string, message string, value interface{}) error {
 		amUtil := new(ArrayMapUtil)
-		if amUtil.KindOfData(value) != reflect.Array{
+		valueType := amUtil.KindOfData(value)
+		if valueType != reflect.Array && valueType != reflect.Slice {
 			if message != "" {
 				return errors.New(message)
 			}
