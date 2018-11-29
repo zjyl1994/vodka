@@ -6,7 +6,9 @@ func main() {
 	vodka.Init("Vodka Demo")
 	vodka.RegisterError("custom",418)
 	vodka.Handle("GET","/ping",vodka.Rules{
-		"id":              []string{"required","string", "alpha_num", "max:50"},
+		QueryString:vodka.Rule{
+			"id":              []string{"required","string", "alpha_num", "max:50"},
+		},
 	},true,pingHandler)
 	vodka.Handle("GET","/error",vodka.Rules{},true,eHandler)
 	vodka.Handle("GET","/db",vodka.Rules{},true,dbHandler)
@@ -14,7 +16,7 @@ func main() {
 }
 
 func pingHandler(c *vodka.Context,params vodka.Datas)(interface{},vodka.Error){
-	id := params["id"].(string) 
+	id := params.QueryString["id"].(string) 
 	return vodka.H{
 		"id":id,
 	},vodka.NewError(nil)
