@@ -5,8 +5,8 @@ import (
 	"net/http"
 )
 
-func validateQueryStringParamsForRequest(req *http.Request, rules map[string][]string) (Values, Datas) {
-	params := make(Datas)
+func validateQueryStringParamsForRequest(req *http.Request, rules Rule) (Values, VariantMap) {
+	params := make(map[string]interface{})
 	amUtil := new(ArrayMapUtil)
 	opts := govalidator.Options{
 		Request:  req,
@@ -29,8 +29,8 @@ func validateQueryStringParamsForRequest(req *http.Request, rules map[string][]s
 	return errsBag,params
 }
 
-func validateJSONParamsForRequest(req *http.Request, rules map[string][]string, allowEmptyBody bool) (Values, Datas) {
-	params := make(Datas)
+func validateJSONParamsForRequest(req *http.Request, rules Rule, allowEmptyBody bool) (Values, VariantMap) {
+	params := make(map[string]interface{})
 	amUtil := new(ArrayMapUtil)
 	opts := govalidator.Options{
 		Request:  req,

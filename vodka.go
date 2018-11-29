@@ -14,9 +14,21 @@ import (
 // public handle
 type H = gin.H
 type Context = gin.Context
-type Rules = govalidator.MapData
 type Values = url.Values
-type Datas = map[string]interface{}
+type VariantMap map[string]interface{}
+type Rule = govalidator.MapData
+type Rules struct{
+	QueryString Rule		`json:"querystring"`
+	Body Rule				`json:"body"`
+}
+type Datas struct{
+	QueryString VariantMap	`json:"querystring"`
+	Body VariantMap			`json:"body"`
+}
+type ErrsBag struct{
+	QueryString Values		`json:"querystring"`
+	Body Values				`json:"body"`
+}
 type HandleFunc func(*Context,Datas)(interface{},Error)
 var Logger = logrus.New()
 var DB *gorm.DB
@@ -39,7 +51,8 @@ func Init(name string){
 	httpPort = mustGetEnv("HTTP_PORT")
 	mysqlDSN := mustGetEnv("MYSQL_DSN")
 	if debugMode{
-		Logger.Printf("Listen: %s\nMySQL: %s\n",httpPort,mysqlDSN)
+		Logger.Println("Listen: ",httpPort)
+		Logger.Println("MySQL: ",mysqlDSN)
 	}
 	DB, err = gorm.Open("mysql", mysqlDSN)
 	if err != nil {
@@ -62,25 +75,23 @@ func Run() error{
 
 func Handle(method ,url string,validRules Rules,allowEmptyBody bool,handler HandleFunc){
 	router.Handle(method,url,func(c *gin.Context){
-		var param Datas
-		if len(validRules) !=0 {
-			var errsBag Values
-			if method == "GET" || method == "DELETE"{
-				errsBag,param = validateQueryStringParamsForRequest(c.Request,validRules)
-			}
-			if method == "POST" || method == "PATCH"{
-				errsBag,param = validateJSONParamsForRequest(c.Request,validRules,allowEmptyBody)
-			}
-			if len(errsBag) > 0 {
-				Logger.Infof("param check on \"%s\" failed = %#v", url, errsBag)
-				c.JSON(http.StatusBadRequest, gin.H{
-					"result":nil,
-					"error":errsBag,
-				})
-				return
-			}
+		var params Datas
+		var errsBag ErrsBag
+		if len(validRules.QueryString) !=0 {
+			errsBag.QueryString,params.QueryString = validateQueryStringParamsForRequest(c.Request,validRules.QueryString)
 		}
-		ret,err := handler(c,param)
+		if len(validRules.Body) !=0 {
+			errsBag.Body,params.Body = validateJSONParamsForRequest(c.Request,validRules.Body,allowEmptyBody)
+		}
+		if (len(errsBag.QueryString)+len(errsBag.Body)) > 0 {
+			Logger.Infof("param check on \"%s\" failed = %#v", url, errsBag)
+			c.JSON(http.StatusBadRequest, gin.H{
+				"result":nil,
+				"error":errsBag,
+			})
+			return
+		}
+		ret,err := handler(c,params)
 		if hasError(err){
 			statusCode,ok := errList[err.identifier]
 			if !ok{
