@@ -92,7 +92,7 @@ func Handle(method ,url string,validRules Rules,allowEmptyBody bool,handler Hand
 			return
 		}
 		ret,err := handler(c,params)
-		if hasError(err){
+		if HasError(err){
 			statusCode,ok := errList[err.identifier]
 			if !ok{
 				statusCode = http.StatusInternalServerError

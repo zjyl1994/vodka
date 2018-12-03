@@ -73,6 +73,6 @@ func MultiRegisterError(errors map[string]int){
 	}
 }
 
-func hasError(err Error) bool{
+func HasError(err Error) bool{
 	return err.identifier != "-"
 }
