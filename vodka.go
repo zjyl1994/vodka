@@ -77,6 +77,7 @@ func Handle(method ,url string,validRules Rules,allowEmptyBody bool,handler Hand
 	router.Handle(method,url,func(c *gin.Context){
 		var params Datas
 		var errsBag ErrsBag
+		removeQueryStringEmptyField(c.Request)
 		if len(validRules.QueryString) !=0 {
 			errsBag.QueryString,params.QueryString = validateQueryStringParamsForRequest(c.Request,validRules.QueryString)
 		}

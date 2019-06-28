@@ -1,8 +1,11 @@
 package vodka
 
 import (
-	"github.com/thedevsaddam/govalidator"
 	"net/http"
+	"net/url"
+	"strings"
+
+	"github.com/thedevsaddam/govalidator"
 )
 
 func validateQueryStringParamsForRequest(req *http.Request, rules Rule) (Values, VariantMap) {
@@ -15,18 +18,18 @@ func validateQueryStringParamsForRequest(req *http.Request, rules Rule) (Values,
 	}
 	v := govalidator.New(opts)
 	errsBag := v.Validate()
-	for k, v:= range req.URL.Query(){
+	for k, v := range req.URL.Query() {
 		params[k] = v[0]
 	}
 	amUtil.FilterOutRangeFields(params, amUtil.KeysA(rules))
-	for rName,rValue := range rules{
-		if !amUtil.IsArrayInclude(rValue,"allow_empty"){
-			if amUtil.IsMapIncludeKey(params,rName) && len(params[rName].(string))==0{
-				delete(params,rName)
+	for rName, rValue := range rules {
+		if !amUtil.IsArrayInclude(rValue, "allow_empty") {
+			if amUtil.IsMapIncludeKey(params, rName) && len(params[rName].(string)) == 0 {
+				delete(params, rName)
 			}
 		}
 	}
-	return errsBag,params
+	return errsBag, params
 }
 
 func validateJSONParamsForRequest(req *http.Request, rules Rule, allowEmptyBody bool) (Values, VariantMap) {
@@ -53,4 +56,14 @@ func validateJSONParamsForRequest(req *http.Request, rules Rule, allowEmptyBody 
 	errsBag = v.ValidateJSON()
 	amUtil.FilterOutRangeFields(params, amUtil.KeysA(rules))
 	return errsBag, params
+}
+
+func removeQueryStringEmptyField(req *http.Request) {
+	resultQuery := url.Values{}
+	for k, v := range req.URL.Query() {
+		if strings.TrimSpace(v[0]) != "" {
+			resultQuery.Set(k, v[0])
+		}
+	}
+	req.URL.RawQuery = resultQuery.Encode()
 }
