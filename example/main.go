@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"time"
 
 	"github.com/zjyl1994/vodka"
 )
@@ -20,6 +21,7 @@ func main() {
 		},
 	}, true, optionalHandler)
 	vodka.Handle("GET", "/error", vodka.Rules{}, true, eHandler)
+	vodka.Handle("GET", "/nowtime", vodka.Rules{}, true, nowHandler)
 	vodka.Handle("GET", "/db", vodka.Rules{}, true, dbHandler)
 	if err := vodka.Run(); err != nil {
 		fmt.Println("ERROR", err)
@@ -53,4 +55,11 @@ func eHandler(c *vodka.Context, params vodka.Datas) (interface{}, vodka.Error) {
 
 func dbHandler(c *vodka.Context, params vodka.Datas) (interface{}, vodka.Error) {
 	return vodka.DB, vodka.NoError
+}
+
+func nowHandler(c *vodka.Context, params vodka.Datas) (interface{}, vodka.Error) {
+	nowtime := vodka.Time(time.Now())
+	return vodka.H{
+		"now": nowtime,
+	}, vodka.NewError(nil)
 }
