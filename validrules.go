@@ -4,9 +4,9 @@ import (
 	"errors"
 	"fmt"
 	"reflect"
+	"regexp"
 	"strconv"
 	"strings"
-	"regexp"
 
 	"github.com/thedevsaddam/govalidator"
 )
@@ -125,9 +125,9 @@ func init() {
 	})
 
 	govalidator.AddCustomRule("datetime", func(field string, rule string, message string, value interface{}) error {
-		const datetimeRegex=`^\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01]) ([01]\d|2[0-3])(:[0-5]\d){2}$`
-		if datetimeStr,ok := value.(string);ok{
-			if match, _ := regexp.MatchString(datetimeRegex, datetimeStr); match{
+		const datetimeRegex = `^\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01]) ([01]\d|2[0-3])(:[0-5]\d){2}$`
+		if datetimeStr, ok := value.(string); ok {
+			if match, _ := regexp.MatchString(datetimeRegex, datetimeStr); match {
 				return nil
 			}
 		}
@@ -135,5 +135,16 @@ func init() {
 			return errors.New(message)
 		}
 		return fmt.Errorf("The %s field must be yyyy-MM-dd HH:mm:ss format", field)
+	})
+
+	govalidator.AddCustomRule("require", func(field string, rule string, message string, value interface{}) error {
+		err := fmt.Errorf("The %s field is required", field)
+		if message != "" {
+			err = errors.New(message)
+		}
+		if value == nil {
+			return err
+		}
+		return nil
 	})
 }
