@@ -73,6 +73,10 @@ func Run() error{
 	return router.Run(httpPort)
 }
 
+func RawHandle(method,url string,handler func(*Context)){
+	router.Handle(method,url,handler)
+}
+
 func Handle(method ,url string,validRules Rules,allowEmptyBody bool,handler HandleFunc){
 	router.Handle(method,url,func(c *gin.Context){
 		var params Datas
